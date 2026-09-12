@@ -1,0 +1,149 @@
+package com.xiaojiaoyin.jiaming.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.xiaojiaoyin.jiaming.domain.model.Gender
+import com.xiaojiaoyin.jiaming.domain.model.NamingProfile
+
+private val ALL_TRAITS = listOf(
+    "灵动活力", "坚韧大气", "温润平和", "书卷气", "明朗开朗", "独立有主见", "平安顺遂",
+)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ProfileEditScreen(
+    initial: NamingProfile?,
+    onSave: (NamingProfile) -> Unit,
+) {
+    var surname by remember { mutableStateOf(initial?.surname ?: "") }
+    var gender by remember { mutableStateOf(initial?.gender ?: Gender.UNKNOWN) }
+    var traits by remember { mutableStateOf(initial?.traits ?: emptyList()) }
+    var avoidInput by remember { mutableStateOf(initial?.avoidChars?.joinToString("") ?: "") }
+    var genChar by remember { mutableStateOf(initial?.generationChar ?: "") }
+    var genAtEnd by remember { mutableStateOf(initial?.generationAtEnd ?: false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        Text("取名档案", style = MaterialTheme.typography.headlineSmall)
+
+        OutlinedTextField(
+            value = surname,
+            onValueChange = { surname = it.take(2) },
+            label = { Text("姓氏（必填）") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+
+        Column {
+            Text("宝宝性别", style = MaterialTheme.typography.titleMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                listOf(
+                    Gender.UNKNOWN to "未知/保密",
+                    Gender.MALE to "男宝",
+                    Gender.FEMALE to "女宝",
+                ).forEach { (g, label) ->
+                    RadioButton(selected = gender == g, onClick = { gender = g })
+                    Text(label, modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(84.dp))
+                }
+            }
+        }
+
+        Column {
+            Text("期望气质（可多选）", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "选词比打字好：这些标签来自真实家长的高频用词。",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(6.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ALL_TRAITS.forEach { t ->
+                    FilterChip(
+                        selected = t in traits,
+                        onClick = {
+                            traits = if (t in traits) traits - t else traits + t
+                        },
+                        label = { Text(t) },
+                    )
+                }
+            }
+        }
+
+        OutlinedTextField(
+            value = avoidInput,
+            onValueChange = { avoidInput = it },
+            label = { Text("避讳字（连写，如长辈名用字）") },
+            modifier = Modifier.fillMaxWidth(),
+            supportingText = { Text("命中即淘汰该候选", style = MaterialTheme.typography.labelMedium) },
+            singleLine = true,
+        )
+
+        Column {
+            OutlinedTextField(
+                value = genChar,
+                onValueChange = { genChar = it.take(1) },
+                label = { Text("字辈字（可选）") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            if (genChar.isNotBlank()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Switch(checked = genAtEnd, onCheckedChange = { genAtEnd = it })
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (genAtEnd) "字辈放在名末" else "字辈放在名首")
+                }
+            }
+        }
+
+        Button(
+            onClick = {
+                onSave(
+                    NamingProfile(
+                        surname = surname.trim(),
+                        gender = gender,
+                        traits = traits,
+                        avoidChars = avoidInput.map { it.toString() }.distinct(),
+                        generationChar = genChar.trim().ifBlank { null },
+                        generationAtEnd = genAtEnd,
+                    ),
+                )
+            },
+            enabled = surname.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("保存档案") }
+        Spacer(Modifier.height(16.dp))
+    }
+}

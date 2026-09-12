@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260912T155847432Z-47200-854e075d0c9f",
+  "runId": "20260912T155847432Z-47200-854e075d0c9f",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "baseline_partial",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline capture had enumeration or snapshot errors",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline_partial: baseline capture had enumeration or snapshot errors",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": null,
+  "diffHash": "d7ccc63ca5cf385c4cdef1c886cc4a70c9df220ae70a62f017ed65896091f01d",
+  "rulesVersion": "unavailable",
+  "sessionHash": "bbb3f585ac45dff7ae45d96507a4c7d0dbe9b3b68ff97ef43627fd39eaaa1332",
+  "reportRef": ".mimosa/reports/task-review-sess_f4737366-da98-4dd0-9682-0f2252b58f84-20260912T155847432Z-47200-854e075d0c9f.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/data/AssetsDataSource.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/data/db/AppDatabase.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/domain/model/Models.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/JiamingApp.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/MainViewModel.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/theme/Theme.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/JiamingNav.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/HomeScreen.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/ProfileEditScreen.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/CandidatesScreen.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/EvidencePanelScreen.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/FavoritesScreen.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/MainActivity.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/test/java/com/xiaojiaoyin/jiaming/GoldenCasesTest.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/test/java/com/xiaojiaoyin/jiaming/TestAssets.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/domain/generate/Generators.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    },
+    {
+      "file": "app/src/main/java/com/xiaojiaoyin/jiaming/domain/rule/Rules.kt",
+      "direct": "complete",
+      "projectContext": "partial"
+    }
+  ],
+  "recordedAt": "2026-09-12T15:58:48.045Z"
+}

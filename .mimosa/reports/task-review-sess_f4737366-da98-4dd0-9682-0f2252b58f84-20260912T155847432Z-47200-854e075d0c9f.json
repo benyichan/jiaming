@@ -1,0 +1,333 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20260912T155847432Z-47200-854e075d0c9f",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "baseline",
+      "target": ".",
+      "reason": "baseline_partial: baseline capture had enumeration or snapshot errors"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": false,
+      "captured_files": 17,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 17
+    },
+    "change_tracking": {
+      "touched_observed": 17,
+      "touched_retained": 17,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 17,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 17,
+      "selected_files": 17,
+      "limit": 20,
+      "truncated": false
+    },
+    "scanning": {
+      "required_files": 17,
+      "scanned_files": 17,
+      "skipped_files": 0,
+      "failed_files": 0,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "baseline_partial": 1,
+      "project_check_failed": 1
+    },
+    "reasons": [
+      {
+        "code": "baseline_partial",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline capture had enumeration or snapshot errors",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline_partial: baseline capture had enumeration or snapshot errors",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-09-12T15:58:47.432Z",
+  "session_id": "sess_f4737366-da98-4dd0-9682-0f2252b58f84",
+  "target": ".",
+  "revision": null,
+  "rules_version": "unavailable",
+  "diff_hash": "d7ccc63ca5cf385c4cdef1c886cc4a70c9df220ae70a62f017ed65896091f01d",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 17,
+    "changed_files": [
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/data/AssetsDataSource.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 38
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "138d135aa4094cddb4663e0add58e9421b20c318dcf274ca1258ac078fc2492b"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/data/db/AppDatabase.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 112
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "99b1d2b3f97fab160544134446612ee5a130623d50c3b35ecacf04bcf21a16bd"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/domain/generate/Generators.kt",
+        "ranges": [
+          {
+            "start": 27,
+            "end": 27
+          }
+        ],
+        "before_hash": "ddc86566a188d9f458b2a02412f4b04d938281376aba824ec7ecbafead0e5d07",
+        "after_hash": "e1d6d0c7d7f7c533511643ed5a1320b0452e1af8b527af4151be47f64f30a4bf"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/domain/model/Models.kt",
+        "ranges": [
+          {
+            "start": 89,
+            "end": 89
+          }
+        ],
+        "before_hash": "1572e3793968ff0ef73b683818d6c852e41524f88699e0dedbdcba0551e8d240",
+        "after_hash": "f1470c353be7eaf28170c920d4ffffb166c7ea303ae3c3332b81d02e16eb5e16"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/domain/rule/Rules.kt",
+        "ranges": [
+          {
+            "start": 203,
+            "end": 205
+          }
+        ],
+        "before_hash": "f4f5074b29d8ed8487165c5b78fb3caf6a106664e608c9a8779f549a85946f23",
+        "after_hash": "b6cffb1495ec5d68e1f095d90f4d40736136a7d20798be158c0ac349ed18ac2f"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/JiamingApp.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 23
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "3b485dac201236f9388c7bffd2109c213cdc2675ae39c4dc65980777258ac5f1"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/MainActivity.kt",
+        "ranges": [
+          {
+            "start": 6,
+            "end": 8
+          },
+          {
+            "start": 13,
+            "end": 14
+          },
+          {
+            "start": 16,
+            "end": 17
+          }
+        ],
+        "before_hash": "ab047b9eeb78073726e5937181f4ba0836864a8c1e26f15cb6fe76da7140cdf0",
+        "after_hash": "276eee85a9b65d392d643f0f3b386bd04a94578ee970d7071617bdda215b1a98"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/CandidatesScreen.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 123
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "76fdefd500f1e3b1e4da087cc77903be758d31eef073f0e51be9491f885331b2"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/EvidencePanelScreen.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 232
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "23ca30946ecc5446eca98959a509c968bf3ff50e4d24e2d460eb4f9acb2e199d"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/FavoritesScreen.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 189
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "e14fbe3b5305a5ed3d680fc2dea382d033d654c10ad5c7aa27bfb0dda5eefe76"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/HomeScreen.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 161
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "73fe75c1da5bff1a3725fd68e67e80ee06f000c587d6589d967649c76cb8fc01"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/JiamingNav.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 105
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "5537ebd5433df81d26153d16799abd99e5ca73c6aaa527290237ebd6b8e6481b"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/MainViewModel.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 144
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "32606d61a30e62f2e16d1b986c01295e37e95dea76396d8b9d3730e9d1788566"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/ProfileEditScreen.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 149
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "eebf8185bd8e33a6326c10f030e285e6f7a22575d745d780b507d775adb1d13c"
+      },
+      {
+        "file": "app/src/main/java/com/xiaojiaoyin/jiaming/ui/theme/Theme.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 79
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "60162e5467c5f9b5beea6c2bd3831676b610e3bfa8ba3b8005d2bd6be3db1049"
+      },
+      {
+        "file": "app/src/test/java/com/xiaojiaoyin/jiaming/GoldenCasesTest.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 140
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "1a0e6ad829627a8b3b6d576bee5140919294cf9cd0a5dce06e62cc4bc0894a96"
+      },
+      {
+        "file": "app/src/test/java/com/xiaojiaoyin/jiaming/TestAssets.kt",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 25
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "7b808586b82c606702e69378154b2377e8d45b12159d0bfb39407231cb423354"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-09-12T15:58:45.076Z",
+    "completed_at": "2026-09-12T15:58:47.432Z",
+    "duration_ms": 2356,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2356,
+    "peakMemoryBytes": 131981312,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 17,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_f4737366-da98-4dd0-9682-0f2252b58f84-20260912T155847432Z-47200-854e075d0c9f.json",
+    "latest_report": ".mimosa/reports/task-review-sess_f4737366-da98-4dd0-9682-0f2252b58f84.json",
+    "history_summary": ".mimosa/history/run-20260912T155847432Z-47200-854e075d0c9f.json"
+  }
+}

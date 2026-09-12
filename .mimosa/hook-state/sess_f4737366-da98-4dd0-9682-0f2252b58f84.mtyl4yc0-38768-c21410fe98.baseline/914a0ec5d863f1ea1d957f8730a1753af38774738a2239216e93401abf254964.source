@@ -1,0 +1,112 @@
+package com.xiaojiaoyin.jiaming.data.db
+
+import android.content.Context
+import androidx.room.Dao
+import androidx.room.Database
+import androidx.room.Entity
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.PrimaryKey
+import androidx.room.Query
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.xiaojiaoyin.jiaming.domain.model.Gender
+import com.xiaojiaoyin.jiaming.domain.model.NamingProfile
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+
+@Entity(tableName = "naming_profile")
+data class ProfileEntity(
+    @PrimaryKey val id: Int = 1,   // M1 单档案；多宝宝/多方案扩展时改为自增
+    val surname: String,
+    val gender: String,            // MALE / FEMALE / UNKNOWN
+    val traitsJson: String,        // 期望标签列表
+    val avoidChars: String,        // 避讳字（逗号分隔，字均为单字）
+    val generationChar: String?,   // 字辈字，null=未启用
+    val generationAtEnd: Boolean,
+) {
+    fun toDomain(): NamingProfile {
+        val json = Json
+        return NamingProfile(
+            surname = surname,
+            gender = Gender.valueOf(gender),
+            traits = json.decodeFromString(ListSerializer(String.serializer()), traitsJson),
+            avoidChars = if (avoidChars.isBlank()) emptyList() else avoidChars.map { it.toString() },
+            generationChar = generationChar,
+            generationAtEnd = generationAtEnd,
+        )
+    }
+
+    companion object {
+        fun fromDomain(p: NamingProfile): ProfileEntity {
+            val json = Json
+            return ProfileEntity(
+                surname = p.surname,
+                gender = p.gender.name,
+                traitsJson = json.encodeToString(ListSerializer(String.serializer()), p.traits),
+                avoidChars = p.avoidChars.joinToString(""),
+                generationChar = p.generationChar,
+                generationAtEnd = p.generationAtEnd,
+            )
+        }
+    }
+}
+
+/** 收藏：保存候选全名与检查结果快照（ScoredCandidate 的可序列化投影） */
+@kotlinx.serialization.Serializable
+@Entity(tableName = "favorite")
+data class FavoriteEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val owner: String,        // P1 / P2
+    val surname: String,
+    val given: String,
+    val failCount: Int,
+    val warnCount: Int,
+    val checksJson: String,   // List<CheckResult>
+    val createdAt: Long,
+)
+
+@Dao
+interface ProfileDao {
+    @Query("SELECT * FROM naming_profile WHERE id = 1")
+    fun observe(): Flow<ProfileEntity?>
+
+    @Query("SELECT * FROM naming_profile WHERE id = 1")
+    suspend fun get(): ProfileEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(profile: ProfileEntity)
+}
+
+@Dao
+interface FavoriteDao {
+    @Query("SELECT * FROM favorite ORDER BY createdAt DESC")
+    fun observeAll(): Flow<List<FavoriteEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(items: List<FavoriteEntity>)
+
+    @Query("DELETE FROM favorite WHERE surname = :surname AND given = :given AND owner = :owner")
+    suspend fun delete(surname: String, given: String, owner: String)
+
+    @Query("SELECT COUNT(*) FROM favorite WHERE surname = :surname AND given = :given AND owner = :owner")
+    suspend fun countOf(surname: String, given: String, owner: String): Int
+
+    @Query("DELETE FROM favorite")
+    suspend fun clearAll()
+}
+
+@Database(entities = [ProfileEntity::class, FavoriteEntity::class], version = 1, exportSchema = false)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun profileDao(): ProfileDao
+    abstract fun favoriteDao(): FavoriteDao
+
+    companion object {
+        fun build(context: Context): AppDatabase =
+            Room.databaseBuilder(context, AppDatabase::class.java, "jiaming.db")
+                .fallbackToDestructiveMigration()
+                .build()
+    }
+}

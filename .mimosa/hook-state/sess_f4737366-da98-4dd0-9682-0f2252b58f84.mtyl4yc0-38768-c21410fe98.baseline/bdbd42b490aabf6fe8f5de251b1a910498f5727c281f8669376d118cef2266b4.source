@@ -1,0 +1,140 @@
+package com.xiaojiaoyin.jiaming
+
+import com.xiaojiaoyin.jiaming.domain.NamingEngine
+import com.xiaojiaoyin.jiaming.domain.model.Candidate
+import com.xiaojiaoyin.jiaming.domain.model.CharData
+import com.xiaojiaoyin.jiaming.domain.model.CheckLevel
+import com.xiaojiaoyin.jiaming.domain.model.Gender
+import com.xiaojiaoyin.jiaming.domain.model.NamingProfile
+import com.xiaojiaoyin.jiaming.domain.model.NegativeLexicon
+import com.xiaojiaoyin.jiaming.domain.model.PolyWhitelist
+import com.xiaojiaoyin.jiaming.domain.model.SurnamePinyin
+import com.xiaojiaoyin.jiaming.domain.model.TraitLexicon
+import com.xiaojiaoyin.jiaming.domain.rule.RulePipeline
+import org.junit.Before
+import org.junit.Test
+
+/**
+ * 黄金用例（design.md §11）：规则正反例 + 端到端生成。
+ * 数据与生产同源：直接读 app/src/main/assets/data 目录下的 json（JUnit 工作目录 = app 模块目录）。
+ */
+class GoldenCasesTest {
+
+    private lateinit var engine: NamingEngine
+    private lateinit var charByChar: Map<Char, CharData>
+    private lateinit var ctxDeps: CtxDeps
+
+    data class CtxDeps(
+        val negative: NegativeLexicon,
+        val whitelist: PolyWhitelist,
+        val surnames: SurnamePinyin,
+    )
+
+    @Before
+    fun setUp() {
+        val lib = TestAssets.charLibrary()
+        val traits = TestAssets.traitLexicon()
+        val negative = TestAssets.negativeLexicon()
+        val whitelist = TestAssets.polyWhitelist()
+        val surnames = TestAssets.surnames()
+        engine = NamingEngine(lib, traits, negative, whitelist, surnames)
+        charByChar = lib.chars.associateBy { it.c.first() }
+        ctxDeps = CtxDeps(negative, whitelist, surnames)
+    }
+
+    private fun profile(
+        surname: String = "陈",
+        gender: Gender = Gender.UNKNOWN,
+        traits: List<String> = listOf("灵动活力", "坚韧大气"),
+    ) = NamingProfile(surname = surname, gender = gender, traits = traits)
+
+    private fun runChecks(surname: String, given: String): Map<String, CheckLevel> {
+        val chars = given.map { c -> charByChar[c] ?: CharData(c.toString(), "?", 1, "du") }
+        val cand = Candidate(surname, given, chars)
+        val ctx = com.xiaojiaoyin.jiaming.domain.rule.RuleContext(
+            profile = profile(surname),
+            charIndex = charByChar,
+            polyWhitelist = ctxDeps.whitelist.chars.map { it.first() }.toSet(),
+            negativeLexicon = ctxDeps.negative,
+            surnamePinyin = ctxDeps.surnames,
+        )
+        return RulePipeline.default().run(cand, ctx).associate { it.ruleId to it.level }
+    }
+
+    /* R1：规范汉字表 */
+    @Test
+    fun r1_nonStandardCharFails() {
+        val fake = CharData("頔", "di2", 9, "lr", std = false)
+        val cand = Candidate("陈", "頔轩", listOf(fake, charByChar.getValue('轩')))
+        val ctx = com.xiaojiaoyin.jiaming.domain.rule.RuleContext(
+            profile(), charByChar, ctxDeps.whitelist.chars.map { it.first() }.toSet(),
+            ctxDeps.negative, ctxDeps.surnames,
+        )
+        val r = RulePipeline.default().run(cand, ctx).first { it.ruleId == "R1" }
+        org.junit.Assert.assertEquals(CheckLevel.FAIL, r.level)
+    }
+
+    /* R4：多音字白名单内外 */
+    @Test
+    fun r4_polyphonicOutsideWhitelistWarns() {
+        val levels = runChecks("陈", "柏川")
+        org.junit.Assert.assertEquals(CheckLevel.WARN, levels["R4"])
+    }
+
+    @Test
+    fun r4_xingInWhitelistPasses() {
+        val levels = runChecks("陈", "景行")
+        org.junit.Assert.assertEquals(CheckLevel.PASS, levels["R4"])
+    }
+
+    /* R7：谐音扫描 */
+    @Test
+    fun r7_duZiTengFails() {
+        val levels = runChecks("杜", "子腾")
+        org.junit.Assert.assertEquals(CheckLevel.FAIL, levels["R7"])
+    }
+
+    @Test
+    fun r7_yangWeiFails() {
+        val levels = runChecks("杨", "伟")
+        org.junit.Assert.assertEquals(CheckLevel.FAIL, levels["R7"])
+    }
+
+    @Test
+    fun r7_siNearSiWarns() {
+        // 思(sī) 与 死(sǐ) 声韵全同仅调异；「死」为一般负面词 → WARN
+        val levels = runChecks("陈", "思远")
+        org.junit.Assert.assertEquals(CheckLevel.WARN, levels["R7"])
+    }
+
+    @Test
+    fun r7_cleanNamePasses() {
+        val levels = runChecks("陈", "清越")
+        org.junit.Assert.assertEquals(CheckLevel.PASS, levels["R7"])
+    }
+
+    /* R9：姓氏连读 */
+    @Test
+    fun r9_shiZhenXiangFails() {
+        val levels = runChecks("史", "珍香")
+        org.junit.Assert.assertEquals(CheckLevel.FAIL, levels["R9"])
+    }
+
+    /* 端到端：候选量与性能（验收口径：30 秒内 ≥20 候选） */
+    @Test
+    fun generate_producesEnoughCandidatesFast() {
+        val start = System.currentTimeMillis()
+        val out = engine.generate(profile(), limit = 60)
+        val elapsed = System.currentTimeMillis() - start
+        org.junit.Assert.assertTrue("实际耗时 ${elapsed}ms", elapsed < 30_000)
+        org.junit.Assert.assertTrue("候选仅 ${out.size} 个", out.size >= 20)
+        // 排序口径：首项不应有硬伤
+        org.junit.Assert.assertEquals(0, out.first().failCount)
+    }
+
+    /* 测名入口：字库外字返回 null（诚实提示，而非假结果） */
+    @Test
+    fun evaluate_unknownCharReturnsNull() {
+        org.junit.Assert.assertNull(engine.evaluate(profile(), "頔轩"))
+    }
+}

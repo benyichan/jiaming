@@ -1,0 +1,121 @@
+package com.xiaojiaoyin.jiaming.domain.generate
+
+import com.xiaojiaoyin.jiaming.domain.model.Candidate
+import com.xiaojiaoyin.jiaming.domain.model.CharData
+import com.xiaojiaoyin.jiaming.domain.model.CharLibrary
+import com.xiaojiaoyin.jiaming.domain.model.ClassicsLibrary
+import com.xiaojiaoyin.jiaming.domain.model.Gender
+import com.xiaojiaoyin.jiaming.domain.model.NamingProfile
+import com.xiaojiaoyin.jiaming.domain.model.Origin
+import com.xiaojiaoyin.jiaming.domain.model.TraitLexicon
+
+/** 性别过滤：字倾向与档案性别一致或中性 */
+private fun genderOk(ch: CharData, gender: Gender): Boolean = when (gender) {
+    Gender.UNKNOWN -> true
+    Gender.MALE -> ch.g != "f"
+    Gender.FEMALE -> ch.g != "m"
+}
+
+/**
+ * GeneratorB 标签组字：期望标签 → 意象字表，两两组合。
+ * 同标签内组合优先（气质纯度高），跨选中标签组合补充。
+ */
+class TraitGenerator(private val lexicon: TraitLexicon) {
+
+    fun generate(profile: NamingProfile, limitPerTrait: Int = 60): List<Candidate> {
+        if (profile.traits.isEmpty()) return emptyList()
+        val pools = profile.traits.mapNotNull { t ->
+            lexicon.traits[t]
+                ?.mapNotNull { s -> if (s.length == 1) charByChar[s[0]] else null }
+                ?.filter { genderOk(it, profile.gender) && !profile.avoidChars.contains(it.c) }
+                ?.take(limitPerTrait)
+        }
+        val out = LinkedHashMap<String, Candidate>()
+        // 同标签组合
+        for (pool in pools) {
+            for (a in pool) for (b in pool) {
+                if (a.c == b.c) continue
+                putCombo(out, profile, a, b)
+            }
+        }
+        // 跨标签组合
+        for (i in pools.indices) for (j in pools.indices) {
+            if (i == j) continue
+            for (a in pools[i]) for (b in pools[j]) {
+                if (a.c == b.c) continue
+                putCombo(out, profile, a, b)
+            }
+        }
+        return out.values.toList()
+    }
+
+    /** 字库引用由 engine 注入（词表里的字必须是字库子集） */
+    lateinit var charByChar: Map<Char, CharData>
+
+    private fun putCombo(
+        out: LinkedHashMap<String, Candidate>,
+        profile: NamingProfile,
+        a: CharData,
+        b: CharData,
+    ) {
+        val given = a.c + b.c
+        if (given !in out) {
+            out[given] = Candidate(profile.surname, given, listOf(a, b))
+        }
+    }
+}
+
+/**
+ * GeneratorA 典籍取词：从典籍库条目的人工精选词（picks）组名，每个候选自带出处。
+ * picks 里的字必须在字库中（拼音/笔画参与后续规则），缺字条目自动跳过并在构建期由校验脚本报告。
+ */
+class ClassicsGenerator(
+    private val classics: ClassicsLibrary,
+    private val charByChar: Map<Char, CharData>,
+) {
+
+    fun generate(profile: NamingProfile): List<Candidate> {
+        val out = LinkedHashMap<String, Candidate>()
+        for (entry in classics.entries) {
+            for (word in entry.picks) {
+                if (word.length != 2) continue
+                val a = charByChar[word[0]] ?: continue
+                val b = charByChar[word[1]] ?: continue
+                if (a.c == b.c) continue
+                if (!genderOk(a, profile.gender) || !genderOk(b, profile.gender)) continue
+                if (profile.avoidChars.any { it in word }) continue
+                val origin = Origin(text = entry.text, book = entry.book, chapter = entry.chapter, gloss = entry.gloss)
+                out.putIfAbsent(
+                    word,
+                    Candidate(profile.surname, word, listOf(a, b), origin),
+                )
+            }
+        }
+        return out.values.toList()
+    }
+}
+
+/**
+ * GeneratorC 字库组合：全库过滤后两两组合，兜底保证候选量与多样性。
+ * 组合空间 O(n²)，n≈250 → 6 万级，纯内存可行。典籍专有字（nm=false）不参与。
+ */
+class ComboGenerator(private val library: CharLibrary) {
+
+    fun generate(profile: NamingProfile, maxPool: Int = 160): List<Candidate> {
+        val pool = library.chars
+            .filter { it.std && it.nm && genderOk(it, profile.gender) && !profile.avoidChars.contains(it.c) }
+            // 简单常用度代理：标签命中多者优先（字库 M1 无独立频率字段）
+            .sortedByDescending { it.t.size }
+            .take(maxPool)
+        val out = LinkedHashMap<String, Candidate>()
+        for (a in pool) {
+            for (b in pool) {
+                if (a.c == b.c) continue
+                val given = a.c + b.c
+                if (given in out) continue
+                out[given] = Candidate(profile.surname, given, listOf(a, b))
+            }
+        }
+        return out.values.toList()
+    }
+}

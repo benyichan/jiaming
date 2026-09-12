@@ -1,0 +1,25 @@
+package com.xiaojiaoyin.jiaming
+
+import com.xiaojiaoyin.jiaming.domain.model.CharLibrary
+import com.xiaojiaoyin.jiaming.domain.model.NegativeLexicon
+import com.xiaojiaoyin.jiaming.domain.model.PolyWhitelist
+import com.xiaojiaoyin.jiaming.domain.model.SurnamePinyin
+import com.xiaojiaoyin.jiaming.domain.model.TraitLexicon
+import kotlinx.serialization.json.Json
+
+/** 测试侧资产加载：与 AssetsDataSource 共用同一份 JSON 与同一套序列化模型（生产/测试同源） */
+object TestAssets {
+    val json = Json { ignoreUnknownKeys = true }
+
+    fun text(path: String): String = FileText.read("src/main/assets/data/$path")
+
+    fun charLibrary(loader: (String) -> String = ::text): CharLibrary = json.decodeFromString(loader("chars.json"))
+    fun traitLexicon(loader: (String) -> String = ::text): TraitLexicon = json.decodeFromString(loader("trait_lexicon.json"))
+    fun negativeLexicon(loader: (String) -> String = ::text): NegativeLexicon = json.decodeFromString(loader("negative_words.json"))
+    fun polyWhitelist(loader: (String) -> String = ::text): PolyWhitelist = json.decodeFromString(loader("poly_whitelist.json"))
+    fun surnames(loader: (String) -> String = ::text): SurnamePinyin = json.decodeFromString(loader("surnames.json"))
+}
+
+private object FileText {
+    fun read(rel: String): String = java.io.File(rel).readText(Charsets.UTF_8)
+}

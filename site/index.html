@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嘉名 JiaMing · 开源中文取名工作台</title>
+<meta name="description" content="离线、开源、无广告的中文取名 App。不打分，给依据：规范汉字、谐音扫描、典籍出处、方言雷区、官方爆款数据，帮全家达成共识。">
+<style>
+  :root{
+    --mint:#2E9E76; --mint-deep:#1F7A5B; --mint-light:#E4F6EE;
+    --paper:#FAFDFB; --ink:#1D2B26; --ink2:#41564D; --line:#DCE9E2;
+    --amber:#B26A00; --red:#B3402E;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;background:var(--paper);color:var(--ink);line-height:1.75}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  a{color:var(--mint-deep);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  header{position:sticky;top:0;background:rgba(250,253,251,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:9}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .logo{font-size:22px;font-weight:800;color:var(--mint-deep);letter-spacing:2px}
+  .logo small{font-size:12px;font-weight:400;color:var(--ink2);letter-spacing:0;margin-left:8px}
+  .nav .links{display:flex;gap:22px;font-size:14px}
+  .nav .links a{color:var(--ink2)}
+
+  .hero{padding:88px 0 64px;text-align:center;background:linear-gradient(180deg,var(--mint-light) 0%,var(--paper) 100%)}
+  .hero h1{font-size:52px;font-weight:900;letter-spacing:6px;color:var(--mint-deep)}
+  .hero .sub{font-size:20px;margin:18px 0 8px;font-weight:600}
+  .hero .desc{font-size:16px;color:var(--ink2);max-width:620px;margin:0 auto}
+  .hero .cta{margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-block;padding:13px 30px;border-radius:999px;font-size:16px;font-weight:700;transition:.2s}
+  .btn-primary{background:var(--mint);color:#fff}
+  .btn-primary:hover{background:var(--mint-deep);text-decoration:none}
+  .btn-ghost{border:1.5px solid var(--mint);color:var(--mint-deep)}
+  .btn-ghost:hover{background:var(--mint-light);text-decoration:none}
+
+  section{padding:64px 0}
+  .kicker{color:var(--mint);font-weight:800;font-size:14px;letter-spacing:3px}
+  h2{font-size:30px;font-weight:800;margin:6px 0 30px}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px}
+  .card h3{font-size:18px;margin-bottom:10px;color:var(--mint-deep)}
+  .card p{font-size:15px;color:var(--ink2)}
+  .card .tag{display:inline-block;font-size:12px;background:var(--mint-light);color:var(--mint-deep);border-radius:6px;padding:2px 10px;margin-bottom:12px;font-weight:700}
+
+  .shots{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:8px}
+  .shots img{width:100%;border-radius:14px;border:1px solid var(--line);box-shadow:0 6px 24px rgba(31,122,91,.10)}
+
+  .rules{margin-top:10px}
+  .rule{display:flex;gap:14px;padding:12px 0;border-bottom:1px dashed var(--line);font-size:15px}
+  .rule b{flex:0 0 56px;color:var(--mint-deep)}
+  .rule .lvl{flex:0 0 96px;font-size:12px;border-radius:6px;text-align:center;height:24px;line-height:24px;font-weight:700}
+  .fact{background:var(--mint-light);color:var(--mint-deep)}
+  .conv{background:#FFF3DC;color:var(--amber)}
+  .contested{background:#FBEAE6;color:var(--red)}
+
+  .honest{background:#fff;border:1.5px dashed var(--mint);border-radius:16px;padding:28px}
+  .honest h3{color:var(--mint-deep);margin-bottom:10px}
+  .honest p{font-size:15px;color:var(--ink2)}
+  .honest .no{color:var(--red);font-weight:800}
+
+  footer{border-top:1px solid var(--line);padding:36px 0 60px;text-align:center;color:var(--ink2);font-size:14px}
+  footer .quote{font-size:16px;color:var(--mint-deep);margin-bottom:8px}
+  @media(max-width:760px){
+    .hero h1{font-size:40px}
+    .shots{grid-template-columns:repeat(2,1fr)}
+    .nav .links{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo">嘉名<small>JiaMing</small></div>
+    <div class="links">
+      <a href="#principles">设计原则</a>
+      <a href="#features">功能</a>
+      <a href="#rules">检查规则</a>
+      <a href="#honest">诚实声明</a>
+      <a href="https://github.com/benyichan/jiaming" target="_blank">GitHub</a>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <h1>嘉名</h1>
+    <div class="sub">不打分的取名 App：每个候选，都给你看得懂的依据</div>
+    <p class="desc">离线 · 开源 · 无广告。规范汉字、谐音扫描、典籍出处、方言雷区、官方爆款数据——十条检查逐条亮结果，帮一家人把名字商量明白。</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/benyichan/jiaming" target="_blank">GitHub 源码</a>
+      <a class="btn btn-ghost" href="https://github.com/benyichan/jiaming/releases" target="_blank">下载 APK</a>
+    </div>
+  </div>
+</div>
+
+<section id="principles">
+  <div class="wrap">
+    <div class="kicker">PRINCIPLES</div>
+    <h2>三条设计原则</h2>
+    <div class="cols">
+      <div class="card">
+        <span class="tag">事实与观点分离</span>
+        <h3>命理不进核心</h3>
+        <p>规范汉字表、字音笔画、公版典籍、官方统计是事实；八字宜补什么是观点。核心引擎只用事实和语言学规则，民俗命理全部是默认关闭、带争议标注的可选模块。</p>
+      </div>
+      <div class="card">
+        <span class="tag">透明取代分数</span>
+        <h3>证据面板，永不打分</h3>
+        <p>竞品把所有名字都打成 95 分再卖解锁。嘉名的每个候选展示 R1~R10 检查的逐条结果：通过了什么、依据是什么、踩了什么雷，全部可点开溯源。</p>
+      </div>
+      <div class="card">
+        <span class="tag">本地优先</span>
+        <h3>数据不出设备</h3>
+        <p>出生日期、籍贯、长辈名讳是敏感信息。全程不申请网络权限；查重名只跳官方渠道，夫妻协作走文件导出导入。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="kicker">FEATURES</div>
+    <h2>功能一览</h2>
+    <div class="cols">
+      <div class="card"><h3>三路候选生成</h3><p>典籍取词（诗经·楚辞·论语·周易，带原文与白话）→ 期望标签组字 → 字库组合，一次生成 60 个候选。</p></div>
+      <div class="card"><h3>R1~R10 检查管线</h3><p>上户口红线、避讳字辈、多音字、声调配平、字形搭配、谐音与姓氏连读、官方爆款降权、家乡话提示。</p></div>
+      <div class="card"><h3>家庭共识</h3><p>夫妻双设备各自收藏，文件交换合并；「共同喜欢」视图、家人意见登记、定名标记一应俱全。</p></div>
+      <div class="card"><h3>证据面板与分享卡片</h3><p>出处原文可校勘、声调曲线可视化、检查清单逐条亮灯；一键导出长图发家庭群。</p></div>
+      <div class="card"><h3>可选八字模块</h3><p>默认关闭。出生后填准时辰才解锁：排盘是确定的历法计算，「宜补什么」强制标注为民俗参考。</p></div>
+      <div class="card"><h3>官方查重名聚合</h3><p>只跳转公安部政务平台等官方渠道，不自造重名数据。</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">SCREENSHOTS</div>
+    <h2>长这样</h2>
+    <div class="shots">
+      <img src="../docs/img/01-home.png" alt="首页">
+      <img src="../docs/img/02-candidates.png" alt="候选列表">
+      <img src="../docs/img/05-evidence-origin.png" alt="典籍出处">
+      <img src="../docs/img/03-evidence.png" alt="检查清单">
+      <img src="../docs/img/06-toolbox.png" alt="工具箱">
+    </div>
+  </div>
+</section>
+
+<section id="rules" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="kicker">RULES</div>
+    <h2>十条检查，层层标注可信度</h2>
+    <div class="rules">
+      <div class="rule"><b>R1</b><span class="lvl fact">事实</span><span>用字在《通用规范汉字表》内——否则上不了户口（国务院公开文件）</span></div>
+      <div class="rule"><b>R2</b><span class="lvl conv">惯例</span><span>避讳字：晚辈不与长辈重字，字表由你填写</span></div>
+      <div class="rule"><b>R3</b><span class="lvl conv">惯例</span><span>字辈约束，名首或名末</span></div>
+      <div class="rule"><b>R4</b><span class="lvl fact">事实</span><span>多音字风险提示（人名单音白名单机制）</span></div>
+      <div class="rule"><b>R5</b><span class="lvl conv">通则</span><span>声调配平：平仄起伏、末字响亮收尾</span></div>
+      <div class="rule"><b>R6</b><span class="lvl conv">通则</span><span>字形搭配：笔画悬殊与结构单调检测</span></div>
+      <div class="rule"><b>R7</b><span class="lvl fact">事实</span><span>谐音扫描：声韵全同即判同音，强禁忌淘汰、一般负面提示</span></div>
+      <div class="rule"><b>R8</b><span class="lvl fact">事实</span><span>爆款降权：公安部及各地公安公开报告的近五年热门名/字</span></div>
+      <div class="rule"><b>R9</b><span class="lvl fact">事实</span><span>姓氏连读特检（史+珍 → 屎真……）</span></div>
+      <div class="rule"><b>R10</b><span class="lvl contested">有争议</span><span>家乡话提示：10 种方言雷区表，带置信度，建议请长辈念一遍</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="honest">
+  <div class="wrap">
+    <div class="kicker">HONESTY</div>
+    <h2>诚实声明</h2>
+    <div class="honest">
+      <h3>我们坚决不做五格打分</h3>
+      <p>市面取名 App 通用的「三才五格」评分，是日本运命学家熊崎健翁 1918 年前后发明的，1929 年成书系统化，1936 年经台湾传入——<span class="no">1918 年之前的中国典籍里零记载</span>。它不是传统，所以嘉名不做，并把理由写进了 <a href="https://github.com/benyichan/jiaming/blob/main/docs/GLOSSARY.md" target="_blank">GLOSSARY.md</a>。</p>
+      <br>
+      <h3>八字是历法，宜补是民俗</h3>
+      <p>干支排盘是确定的历法计算（lunar 库）；「缺什么补什么」是解释体系，流派间结论都可能不同。所以八字模块默认关闭、开启有免责、结论强制标注「民俗文化参考，无科学结论支持」。</p>
+      <br>
+      <h3>说不了谎的地方</h3>
+      <p>查重名只跳官方渠道，不编数据；爆款字只引用官方公开报告并注明出处；方言提示做不到精确拟音，就诚实说「请长辈念一遍」。每条数据可溯源，欢迎社区校勘。</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="quote">「肇锡余以嘉名」——《离骚》</div>
+    <p>愿你给孩子的名字，经得起查证。</p>
+    <p style="margin-top:10px">
+      <a href="https://github.com/benyichan/jiaming" target="_blank">GitHub</a> ·
+      <a href="https://github.com/benyichan/jiaming/releases" target="_blank">下载 APK</a> ·
+      <a href="https://github.com/benyichan/jiaming/blob/main/docs/CONTRIBUTING.md" target="_blank">贡献数据</a> ·
+      MIT License
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
