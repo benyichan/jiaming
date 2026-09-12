@@ -9,3 +9,6 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.apk.idsig
+
+# 安全插件本地状态
+.mimosa/
