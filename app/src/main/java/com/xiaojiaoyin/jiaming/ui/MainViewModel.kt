@@ -9,6 +9,7 @@ import com.xiaojiaoyin.jiaming.data.db.FavoriteEntity
 import com.xiaojiaoyin.jiaming.data.db.ProfileEntity
 import com.xiaojiaoyin.jiaming.data.db.VoteEntity
 import com.xiaojiaoyin.jiaming.data.prefs.SettingsStore
+import com.xiaojiaoyin.jiaming.domain.NamingEngine
 import com.xiaojiaoyin.jiaming.domain.model.CheckResult
 import com.xiaojiaoyin.jiaming.domain.model.NamingProfile
 import com.xiaojiaoyin.jiaming.domain.model.ScoredCandidate
@@ -23,6 +24,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.random.Random
 
 @Serializable
 data class ExportBundle(
@@ -65,6 +67,10 @@ class MainViewModel(
         private set
     var generating by mutableStateOf(false)
         private set
+    var canShuffle by mutableStateOf(false)
+        private set
+
+    private var rankedCache: List<ScoredCandidate> = emptyList()
 
     fun saveProfile(p: NamingProfile) {
         scope.launch { db.profileDao().upsert(ProfileEntity.fromDomain(p)) }
@@ -73,10 +79,22 @@ class MainViewModel(
     fun generate(p: NamingProfile) {
         scope.launch {
             generating = true
-            candidates = withContext(Dispatchers.Default) { assets.engine.generate(p) }
+            // 重计算只做一次（秒级）；「换一批」在缓存上毫秒级重新采样
+            rankedCache = withContext(Dispatchers.Default) { assets.engine.rank(p) }
             generating = false
+            canShuffle = rankedCache.size > candidates.size
+            shuffle()
         }
     }
+
+    /** 换一批：同一批合格候选的层内随机轮换，质量分层不变 */
+    fun shuffle() {
+        if (rankedCache.isEmpty()) return
+        candidates = NamingEngine.sample(rankedCache, limit = 60, seed = Random.nextLong())
+        canShuffle = rankedCache.size > candidates.size
+    }
+
+    fun rankedSize(): Int = rankedCache.size
 
     fun evaluate(p: NamingProfile, given: String): ScoredCandidate? = assets.engine.evaluate(p, given)
 

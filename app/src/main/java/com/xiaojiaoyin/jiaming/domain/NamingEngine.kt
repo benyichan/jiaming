@@ -50,21 +50,47 @@ class NamingEngine(
         trendData = trendData,
     )
 
-    fun generate(profile: NamingProfile, limit: Int = 60): List<ScoredCandidate> {
+    fun generate(profile: NamingProfile, limit: Int = 60): List<ScoredCandidate> =
+        sample(rank(profile), limit, seed = System.nanoTime())
+
+    /** 全量按口径排序（FAIL 少 → WARN 少 → 软分高），不截断、不随机——确定性视图 */
+    fun rank(profile: NamingProfile): List<ScoredCandidate> {
         if (profile.surname.isBlank()) return emptyList()
         val ctx = context(profile)
-        val raw = LinkedHashMap<String, Candidate>()
-        // A 典籍（带出处，软分+2）→ B 标签（气质对齐）→ C 字库（兜底多样性）
-        classicsGen.generate(profile).forEach { raw.putIfAbsent(it.given, it) }
-        traitGen.generate(profile).forEach { raw.putIfAbsent(it.given, it) }
-        comboGen.generate(profile).forEach { raw.putIfAbsent(it.given, it) }
-
         val order = compareBy<ScoredCandidate>({ it.failCount }, { it.warnCount }, { -it.softScore })
-        val all = raw.values.map { cand ->
+        val all = rawCandidates(profile).values.map { cand ->
             val checks = pipeline.run(cand, ctx)
             ScoredCandidate(cand, checks, softScore(cand, ctx))
         }
-        return all.sortedWith(order).take(limit)
+        return all.sortedWith(order)
+    }
+
+    private fun rawCandidates(profile: NamingProfile): LinkedHashMap<String, Candidate> {
+        val raw = LinkedHashMap<String, Candidate>()
+        // A 典籍（带出处）→ B 标签（气质对齐）→ C 字库（兜底多样性）
+        classicsGen.generate(profile).forEach { raw.putIfAbsent(it.given, it) }
+        traitGen.generate(profile).forEach { raw.putIfAbsent(it.given, it) }
+        comboGen.generate(profile).forEach { raw.putIfAbsent(it.given, it) }
+        return raw
+    }
+
+    companion object {
+        /** 软分分档粒度：同档内部随机轮换，档间保持质量排序 */
+        const val SOFT_BUCKET = 3
+
+        /**
+         * 分层随机采样：质量分层（fail/warn/软分档）固定，层内顺序按 seed 洗牌。
+         * 同 seed 结果可复现；不同 seed 每次换一批——回应「每次都一样」。
+         */
+        fun sample(ranked: List<ScoredCandidate>, limit: Int, seed: Long): List<ScoredCandidate> {
+            val rnd = kotlin.random.Random(seed)
+            return ranked
+                .groupBy { Triple(it.failCount, it.warnCount, it.softScore / SOFT_BUCKET) }
+                .toList()
+                .sortedWith(compareBy({ it.first.first }, { it.first.second }, { -it.first.third }))
+                .flatMap { (_, group) -> group.shuffled(rnd) }
+                .take(limit)
+        }
     }
 
     /** 单名体检：「测名」入口——用户自拟名字跑同一套管线 */

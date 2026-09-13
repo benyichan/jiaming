@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,21 +46,31 @@ fun CandidatesScreen(vm: MainViewModel, onOpen: (String) -> Unit) {
             Text("候选名", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
             if (generating) {
                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                Spacer(Modifier.height(0.dp))
             } else {
                 Text(
-                    "${list.size} 个 · 按检查结果排序",
+                    "共 ${vm.rankedSize()} 个合格 · 展示 ${list.size}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
-        Text(
-            "排序口径：硬伤少 → 注意少 → 气质匹配高。UI 永不打分，依据进面板逐条看。",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 20.dp),
-        )
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                "质量分层固定，层内随机轮换：换一批只看到新的合格候选，不会漏掉好名字。",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            if (!generating && vm.canShuffle) {
+                OutlinedButton(onClick = { vm.shuffle() }) { Text("换一批") }
+            }
+        }
         Spacer(Modifier.height(6.dp))
         LazyColumn(Modifier.fillMaxSize(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)) {
             items(list, key = { it.candidate.given }) { item ->

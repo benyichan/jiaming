@@ -160,11 +160,49 @@ class GoldenCasesTest {
         )
     }
 
+    /* 采样随机性：回应「每次生成结果都一样」 */
+    @Test
+    fun sample_sameSeedReproducible() {
+        val ranked = engine.rank(profile())
+        val a = NamingEngine.sample(ranked, 60, seed = 42)
+        val b = NamingEngine.sample(ranked, 60, seed = 42)
+        org.junit.Assert.assertEquals(a.map { it.candidate.given }, b.map { it.candidate.given })
+    }
+
+    @Test
+    fun sample_differentSeedChangesBatch() {
+        val ranked = engine.rank(profile())
+        assertTrue("候选池应远大于展示量", ranked.size > 120)
+        val a = NamingEngine.sample(ranked, 60, seed = 1).map { it.candidate.given }
+        val b = NamingEngine.sample(ranked, 60, seed = 2).map { it.candidate.given }
+        org.junit.Assert.assertNotEquals(a, b)
+    }
+
+    @Test
+    fun sample_keepsQualityLayers() {
+        val ranked = engine.rank(profile())
+        val out = NamingEngine.sample(ranked, 60, seed = 7)
+        assertTrue("采样的首项不应有硬伤", out.first().failCount == 0)
+        // 质量分层不回退：任意靠后项的 (fail, warn) 不优于靠前项；同层时软分档不升序回退
+        fun key(s: com.xiaojiaoyin.jiaming.domain.model.ScoredCandidate) =
+            Triple(s.failCount, s.warnCount, -s.softScore / NamingEngine.SOFT_BUCKET)
+        for (i in 1 until out.size) {
+            val pk = key(out[i - 1])
+            val ck = key(out[i])
+            val ok = ck.first > pk.first ||
+                (ck.first == pk.first && (ck.second > pk.second || (ck.second == pk.second && ck.third >= pk.third)))
+            assertTrue(
+                "质量分层被破坏 @${i}: ${out[i - 1].candidate.given} -> ${out[i].candidate.given}",
+                ok,
+            )
+        }
+    }
+
     /* 端到端：候选量与性能（验收口径：30 秒内 ≥20 候选） */
     @Test
     fun generate_producesEnoughCandidatesFast() {
         val start = System.currentTimeMillis()
-        val out = engine.generate(profile(), limit = 60)
+        val out = engine.rank(profile()).take(60)
         val elapsed = System.currentTimeMillis() - start
         assertTrue("实际耗时 ${elapsed}ms", elapsed < 30_000)
         assertTrue("候选仅 ${out.size} 个", out.size >= 20)
